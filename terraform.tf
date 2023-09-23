@@ -1,40 +1,30 @@
-#AWS Provider
-terraform {
-  required_providers {
-    aws = {
-      source = "hashicorp/aws"
-      version = "5.10.0"
-    }
-  }
-}
-
 provider "aws" {
-  region = "us-east-1"
-  profile = "my-profile"
+  region     = "us-east-2"
+access_key=" "
+secret_key=" "
 }
-
-#vpc
-resource "aws_vpc" "this" {
-  cidr_block = "10.100.0.0/16"
+# Creating VPC
+resource "aws_vpc" "tf-vpc" {
+  cidr_block       = "192.168.0.0/16"
+  instance_tenancy = "default"
   tags = {
-    Name = "upgrad-vpc"
+    Name = "tf-vpc"
   }
 }
-
 #public subnets
 resource "aws_subnet" "public1" {
-  vpc_id     = aws_vpc.this.id
+  vpc_id     = ${aws_vpc.tf-vpc.id}"
   cidr_block = "10.100.1.0/24"
-  availability_zone = "us-east-1a"
+  availability_zone = "us-east-2a"
 
   tags = {
     Name = "upgrad-public-1"
   }
 }
 resource "aws_subnet" "public2" {
-  vpc_id     = aws_vpc.this.id
+  vpc_id     = ${aws_vpc.tf-vpc.id}"
   cidr_block = "10.100.2.0/24"
-  availability_zone = "us-east-1b"
+  availability_zone = "us-east-2a"
 
   tags = {
     Name = "upgrad-public-2"
@@ -43,18 +33,18 @@ resource "aws_subnet" "public2" {
 
 #private subnets
 resource "aws_subnet" "private1" {
-  vpc_id     = aws_vpc.this.id
+  vpc_id     = ${aws_vpc.tf-vpc.id}"
   cidr_block = "10.100.3.0/24"
-  availability_zone = "us-east-1a"
+  availability_zone = "us-east-2b"
 
   tags = {
     Name = "upgrad-private-1"
   }
 }
 resource "aws_subnet" "private2" {
-  vpc_id     = aws_vpc.this.id
+  vpc_id     = ${aws_vpc.tf-vpc.id}"
   cidr_block = "10.100.4.0/24"
-  availability_zone = "us-east-1b"
+  availability_zone = "us-east-2b"
 
   tags = {
     Name = "upgrad-private-2"
@@ -62,8 +52,8 @@ resource "aws_subnet" "private2" {
 }
 
 #internet gateway
-resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.this.id
+resource "aws_internet_gateway" "tf-igw" {
+  vpc_id = ${aws_vpc.tf-vpc.id}"
 
   tags = {
     Name = "upgrad-igw"
@@ -87,7 +77,7 @@ resource "aws_nat_gateway" "nat" {
 
 #public route table
 resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.this.id
+  vpc_id = "${aws_vpc.tf-vpc.id}"
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -101,8 +91,7 @@ resource "aws_route_table" "public" {
 
 #private route table
 resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.this.id
-
+  vpc_id = "${aws_vpc.tf-vpc.id}"
   route {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.nat.id
